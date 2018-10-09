@@ -10,6 +10,7 @@ import de.raidcraft.util.CustomItemUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -17,6 +18,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -26,18 +28,28 @@ import org.bukkit.inventory.ItemStack;
 public class RCPlayerMenuPlugin extends BasePlugin {
 
     private LocalConfiguration config;
+    private PlayerListener listener;
 
     @Override
     public void enable() {
         this.config = configure(new LocalConfiguration(this));
         if (getConfig().enabled) {
-            registerEvents(new PlayerListener(this));
+            listener = new PlayerListener(this);
+            registerEvents(listener);
         }
     }
 
     @Override
     public void disable() {
         Bukkit.getScheduler().cancelTasks(this);
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!listener.getClearedCraftingFields().remove(player.getUniqueId())) {
+                InventoryView view = player.getOpenInventory();
+                if (PlayerListener.isPlayerCraftingInv(view)) {
+                    view.getTopInventory().clear();
+                }
+            }
+        }
     }
 
     public class LocalConfiguration extends ConfigurationBase<RCPlayerMenuPlugin> {

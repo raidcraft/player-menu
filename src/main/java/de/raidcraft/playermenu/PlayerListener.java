@@ -133,7 +133,7 @@ public class PlayerListener implements Listener {
         RaidCraft.getComponent(RCSkillsHotbar.class).openSkillMenu(player);
     }
 
-    private static boolean isPlayerCraftingInv(InventoryView view) {
+    public static boolean isPlayerCraftingInv(InventoryView view) {
         return view.getTopInventory().getType() == InventoryType.CRAFTING
                 && view.getTopInventory().getSize() == PLAYER_CRAFT_INV_SIZE;
     }
