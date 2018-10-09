@@ -1,7 +1,7 @@
 name: RCPlayerMenu
-main: de.raidcraft.playermenu.RCPlayerMenu
+main: de.raidcraft.playermenu.RCPlayerMenuPlugin
 version: ${project.version}#${build.number}
 author: Silthus
 website: www.raid-craft.de
-depend: [RaidCraft-API,RCSkills]
+depend: [RaidCraft-API,RCSkills,RCSkillsHotbar,RCQuests]
 database: true
