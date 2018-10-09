@@ -16,6 +16,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -73,6 +74,18 @@ public class PlayerListener implements Listener {
 
         // Remove the ring item in the matrix to prevent
         // players from duping them
+        if (isPlayerCraftingInv(view)) {
+            view.getTopInventory().clear();
+        }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        if (clearedCraftingFields.remove(event.getPlayer().getUniqueId())) {
+            return;
+        }
+
+        InventoryView view = event.getPlayer().getOpenInventory();
         if (isPlayerCraftingInv(view)) {
             view.getTopInventory().clear();
         }
