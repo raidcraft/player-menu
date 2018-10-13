@@ -182,7 +182,7 @@ public class PlayerListener implements Listener {
         Hero hero = RaidCraft.getComponent(CharacterManager.class).getHero(player);
         if (hero == null) return new ItemStack(Material.AIR);
 
-        if (hero.getVirtualProfession().equals(hero.getSelectedProfession())) return new ItemStack(Material.AIR);
+        if (hero.getVirtualProfession().equals(hero.getHighestRankedProfession())) return new ItemStack(Material.AIR);
 
         return new ItemStackBuilder(Material.GOLD_SWORD)
                 .title(ChatColor.GOLD + "Skill Menü")
