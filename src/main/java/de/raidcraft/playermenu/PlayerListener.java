@@ -5,6 +5,8 @@ import de.raidcraft.hotbar.skills.RCSkillsHotbar;
 import de.raidcraft.quests.QuestManager;
 import de.raidcraft.quests.api.holder.QuestHolder;
 import de.raidcraft.quests.api.quest.Quest;
+import de.raidcraft.skills.CharacterManager;
+import de.raidcraft.skills.api.hero.Hero;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import lombok.Data;
 import org.bukkit.Bukkit;
@@ -31,8 +33,8 @@ public class PlayerListener implements Listener {
 
     private static final int PLAYER_CRAFT_INV_SIZE = 5;
     private static final int CLEAR_INV_SLOT = 4;
-    private static final int SETTINGS_SLOT = 3;
-    private static final int SKILLS_MENU_SLOT = 2;
+    private static final int QUEST_INVENTORY_SLOT = 2;
+    private static final int SKILLS_MENU_SLOT = 3;
     private static final int QUEST_LOG_SLOT = 1;
 
     private final RCPlayerMenuPlugin plugin;
@@ -57,7 +59,7 @@ public class PlayerListener implements Listener {
                     Inventory crafting = view.getTopInventory();
                     crafting.setItem(SKILLS_MENU_SLOT, getSkillMenu(player));
                     crafting.setItem(QUEST_LOG_SLOT, getQuestLog(player));
-                    crafting.setItem(SETTINGS_SLOT, getSettingsItem(player));
+                    crafting.setItem(QUEST_INVENTORY_SLOT, getQuestInventory(player));
                     crafting.setItem(CLEAR_INV_SLOT, getClearItem());
                 }
             }
@@ -96,6 +98,8 @@ public class PlayerListener implements Listener {
         if (clearedCraftingFields.contains(event.getWhoClicked().getUniqueId())) {
             return;
         }
+        ItemStack clickedItem = event.getClickedInventory().getItem(event.getSlot());
+        if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
         InventoryView view = event.getView();
 
@@ -118,6 +122,9 @@ public class PlayerListener implements Listener {
                     case QUEST_LOG_SLOT:
                         openQuestLog((Player) event.getWhoClicked());
                         break;
+                    case QUEST_INVENTORY_SLOT:
+                        openQuestInventory((Player) event.getWhoClicked());
+                        break;
 
                 }
                 event.setCancelled(true);
@@ -126,10 +133,25 @@ public class PlayerListener implements Listener {
     }
 
     private static void openQuestLog(Player player) {
+        OpenMenuEvent event = new OpenMenuEvent(player, OpenMenuEvent.Type.QUEST);
+        RaidCraft.callEvent(event);
+        if (event.isCancelled()) return;
         RaidCraft.getComponent(QuestManager.class).openQuestLog(player);
     }
 
+    private static void openQuestInventory(Player player) {
+        QuestHolder questHolder = RaidCraft.getComponent(QuestManager.class).getQuestHolder(player);
+        if (questHolder == null) return;
+        OpenMenuEvent event = new OpenMenuEvent(player, OpenMenuEvent.Type.QUEST_INVENTORY);
+        RaidCraft.callEvent(event);
+        if (event.isCancelled()) return;
+        questHolder.getQuestInventory().open();
+    }
+
     private static void openSkillMenu(Player player) {
+        OpenMenuEvent event = new OpenMenuEvent(player, OpenMenuEvent.Type.SKILLS);
+        RaidCraft.callEvent(event);
+        if (event.isCancelled()) return;
         RaidCraft.getComponent(RCSkillsHotbar.class).openSkillMenu(player);
     }
 
@@ -141,18 +163,30 @@ public class PlayerListener implements Listener {
     private static ItemStack getClearItem() {
         return new ItemStackBuilder(Material.BARRIER)
                 .title(ChatColor.RED + "Crafting Feld räumen.")
-                .lore(ChatColor.GRAY + "Linksklick: Entfernt das Menü aus dem Crafting Feld um Platz zum Craften zu machen.")
+                .lore(ChatColor.GRAY + "Klick: Entfernt das Menü aus dem Crafting Feld um Platz zum Craften zu machen.")
                 .item();
     }
 
-    private static ItemStack getSettingsItem(Player player) {
-        return new ItemStackBuilder(Material.STRUCTURE_VOID).title("PLACEHOLDER").item();
+    private static ItemStack getQuestInventory(Player player) {
+
+        QuestHolder questHolder = RaidCraft.getComponent(QuestManager.class).getQuestHolder(player);
+        if (questHolder == null) return new ItemStack(Material.AIR);
+
+        return new ItemStackBuilder(Material.ENDER_CHEST)
+                .title(ChatColor.GOLD + "Quest Inventar")
+                .lore(ChatColor.AQUA + "" + questHolder.getQuestInventory().count() + ChatColor.WHITE + " Items im Quest Inventar.",
+                        ChatColor.GRAY + "Klick: Öffnet das Quest Log.").item();
     }
 
-    private static ItemStack getSkillMenu(Player player) {
+    private ItemStack getSkillMenu(Player player) {
+        Hero hero = RaidCraft.getComponent(CharacterManager.class).getHero(player);
+        if (hero == null) return new ItemStack(Material.AIR);
+
+        if (hero.getVirtualProfession().equals(hero.getSelectedProfession())) return new ItemStack(Material.AIR);
+
         return new ItemStackBuilder(Material.GOLD_SWORD)
                 .title(ChatColor.GOLD + "Skill Menü")
-                .lore(ChatColor.GRAY + "Linksklick: Öffnet das Skill Menü.")
+                .lore(ChatColor.GRAY + "Klick: Öffnet das Skill Menü.")
                 .item();
     }
 
@@ -167,6 +201,6 @@ public class PlayerListener implements Listener {
         return new ItemStackBuilder(Material.BOOK_AND_QUILL)
                 .title(ChatColor.GOLD + "Quest Log")
                 .lore(ChatColor.AQUA + "" + activeQuests.size() + ChatColor.WHITE + " aktive Quests.",
-                        ChatColor.GRAY + "Linksklick: Öffnet das Quest Log.").item();
+                        ChatColor.GRAY + "Klick: Öffnet das Quest Log.").item();
     }
 }
