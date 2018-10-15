@@ -38,12 +38,10 @@ public class RCPlayerMenuPlugin extends BasePlugin {
     @Override
     public void enable() {
         this.config = configure(new LocalConfiguration(this));
-        if (getConfig().enabled) {
-            listener = new PlayerListener(this);
-            registerEvents(listener);
-            ActionAPI.register(this).global()
-                    .trigger(new MenuTrigger());
-        }
+        listener = new PlayerListener(this);
+        registerEvents(listener);
+        ActionAPI.register(this).global()
+                .trigger(new MenuTrigger());
     }
 
     @Override
@@ -64,9 +62,6 @@ public class RCPlayerMenuPlugin extends BasePlugin {
         @Comment("Interval in ticks for the task that refreshes the player menu inside the crafting field.")
         @Setting("task-interval")
         public long menuTaskInterval = 20L;
-        @Setting("enabled")
-        @Comment("You can disable the plugin by switching this on and off.")
-        public boolean enabled = true;
 
         public LocalConfiguration(RCPlayerMenuPlugin plugin) {
             super(plugin, "config.yml");
