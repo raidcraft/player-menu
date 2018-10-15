@@ -98,6 +98,8 @@ public class PlayerListener implements Listener {
         if (clearedCraftingFields.contains(event.getWhoClicked().getUniqueId())) {
             return;
         }
+        if (event.getClickedInventory() == null) return;
+
         ItemStack clickedItem = event.getClickedInventory().getItem(event.getSlot());
         if (clickedItem == null || clickedItem.getType() == Material.AIR) return;
 
