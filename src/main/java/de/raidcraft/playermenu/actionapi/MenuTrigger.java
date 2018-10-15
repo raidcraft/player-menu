@@ -22,7 +22,7 @@ public class MenuTrigger extends Trigger implements Listener {
     public void onMenuOpen(OpenMenuEvent event) {
 
         informListeners("open", event.getPlayer(), config -> {
-            if (config.isSet("menu")) return true;
+            if (!config.isSet("menu")) return true;
             return config.getString("menu").equalsIgnoreCase(event.getMenu().name());
         });
     }
