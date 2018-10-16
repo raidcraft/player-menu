@@ -14,7 +14,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -88,6 +90,18 @@ public class PlayerListener implements Listener {
         }
 
         InventoryView view = event.getPlayer().getOpenInventory();
+        if (isPlayerCraftingInv(view)) {
+            view.getTopInventory().clear();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        if (clearedCraftingFields.remove(event.getEntity().getUniqueId())) {
+            return;
+        }
+
+        InventoryView view = event.getEntity().getOpenInventory();
         if (isPlayerCraftingInv(view)) {
             view.getTopInventory().clear();
         }
