@@ -1,12 +1,14 @@
 package de.raidcraft.playermenu;
 
 import de.raidcraft.RaidCraft;
+import de.raidcraft.api.player.GhostManager;
 import de.raidcraft.hotbar.skills.RCSkillsHotbar;
 import de.raidcraft.quests.QuestManager;
 import de.raidcraft.quests.api.holder.QuestHolder;
 import de.raidcraft.quests.api.quest.Quest;
 import de.raidcraft.skills.CharacterManager;
 import de.raidcraft.skills.api.hero.Hero;
+import de.raidcraft.util.PlayerUtil;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import lombok.Data;
 import org.bukkit.Bukkit;
@@ -21,6 +23,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -50,6 +53,8 @@ public class PlayerListener implements Listener {
                 if (clearedCraftingFields.contains(player.getUniqueId())) {
                     continue;
                 }
+                GhostManager ghostManager = RaidCraft.getComponent(GhostManager.class);
+                if (ghostManager != null && ghostManager.isGhost(player)) continue;
 
                 InventoryView view = player.getOpenInventory();
 
@@ -95,16 +100,26 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerDeath(PlayerDeathEvent event) {
         if (clearedCraftingFields.remove(event.getEntity().getUniqueId())) {
             return;
         }
+        clearedCraftingFields.add(event.getEntity().getUniqueId());
 
         InventoryView view = event.getEntity().getOpenInventory();
         if (isPlayerCraftingInv(view)) {
             view.getTopInventory().clear();
         }
+        event.getDrops().remove(getClearItem());
+        event.getDrops().remove(getQuestInventory(event.getEntity()));
+        event.getDrops().remove(getQuestLog(event.getEntity()));
+        event.getDrops().remove(getSkillMenu(event.getEntity()));
+    }
+
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+    public void onRespawn(PlayerRespawnEvent event) {
+        clearedCraftingFields.remove(event.getPlayer().getUniqueId());
     }
 
     @EventHandler
