@@ -5,3 +5,4 @@ author: Silthus
 website: www.raid-craft.de
 depend: [RaidCraft-API,RCSkills,RCSkillsHotbar,RCQuests]
 database: true
+api-version: 1.13

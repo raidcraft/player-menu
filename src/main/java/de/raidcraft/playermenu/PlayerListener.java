@@ -215,7 +215,7 @@ public class PlayerListener implements Listener {
 
         if (hero.getVirtualProfession().equals(hero.getHighestRankedProfession())) return new ItemStack(Material.AIR);
 
-        return new ItemStackBuilder(Material.GOLD_SWORD)
+        return new ItemStackBuilder(Material.GOLDEN_SWORD)
                 .title(ChatColor.GOLD + "Skill Menü")
                 .lore(ChatColor.GRAY + "Klick: Öffnet das Skill Menü.")
                 .item();
@@ -229,7 +229,7 @@ public class PlayerListener implements Listener {
                     .item();
         }
         List<Quest> activeQuests = questHolder.getActiveQuests();
-        return new ItemStackBuilder(Material.BOOK_AND_QUILL)
+        return new ItemStackBuilder(Material.WRITABLE_BOOK)
                 .title(ChatColor.GOLD + "Quest Log")
                 .lore(ChatColor.AQUA + "" + activeQuests.size() + ChatColor.WHITE + " aktive Quests.",
                         ChatColor.GRAY + "Klick: Öffnet das Quest Log.").item();
